@@ -1,0 +1,156 @@
+- &setting_0
+  model: &model_defaults
+    type: 'NGPRadianceField'
+    param: &model_param_defaults
+      num_dim: 3
+      aabb: [-1.5, -1.5, -1.5, 1.5, 1.5, 1.5]
+
+  train: &train_defaults
+    # nerfacc_data_root:
+    reportsteps: 100
+    maxsteps: 35000
+    nerfacc_scene: lego
+
+# 1 
+- <<: *setting_0
+  model:
+    type: DRRGridRadianceField
+    param:
+      <<: *model_param_defaults
+      spatial_fdim: 64
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          if_refine: True
+          grid_type: MultiDenseFeatGrid
+          grid_kwargs:
+            grid_shapes:
+              - [16, 16, 16]
+              - [32, 32, 32]
+              - [64, 64, 64]
+              - [96, 96, 96]
+            num_feat: 16
+
+          refiner_kwargs:
+            type: GLUFeatMLP
+            param:
+              feat_dim: 64
+              out_dim: 64
+              num_layers: 4
+              hidden_mult: 8
+              block_activation: ReLU
+              use_norm: true
+              skip_connection: true
+
+# 2
+- <<: *setting_0
+  model:
+    type: DRRGridRadianceField
+    param:
+      <<: *model_param_defaults
+      spatial_fdim: 64
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          if_refine: False
+          grid_type: MultiDenseFeatGrid
+          grid_kwargs:
+            grid_shapes:
+              - [16, 16, 16]
+              - [32, 32, 32]
+              - [64, 64, 64]
+              - [96, 96, 96]
+            num_feat: 16
+
+# 3
+- <<: *setting_0
+  model:
+    type: VanillaNeRFRadianceField
+    param:
+      net_depth_condition: 1
+
+# 4
+- <<: *setting_0
+  model:
+    type: DRRGridRadianceField
+    param:
+      <<: *model_param_defaults
+      spatial_fdim: 48
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          if_refine: True
+          grid_type: TriPlane
+          grid_kwargs:
+            plane_res: [256, 256]
+            num_feat: 48
+          refiner_kwargs:
+            type: ModelList
+            param:
+              num_models: 3
+              model_class: GLUFeatMLP
+              model_kwargs:
+                feat_dim: 48
+                out_dim: 48
+                num_layers: 4
+                hidden_mult: 8
+                block_activation: ReLU
+                use_norm: true
+                skip_connection: true
+
+# 5
+- <<: *setting_0
+  model:
+    type: DRRGridRadianceField
+    param:
+      <<: *model_param_defaults
+      spatial_fdim: 48
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          grid_type: TriPlane
+          grid_kwargs:
+            plane_res: [256, 256]
+            num_feat: 48
+
+# 6
+- <<: *setting_0
+  model:
+    type: DRRGridRadianceField
+    param:
+      <<: *model_param_defaults
+      spatial_fdim: 16
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          if_refine: True
+          grid_type: DenseFeatGrid
+          grid_kwargs:
+            grid_shape: [128, 128, 128]
+            num_feat: 16
+          refiner_kwargs:
+            type: GLUFeatMLP
+            param:
+              feat_dim: 16
+              out_dim: 16
+              num_layers: 4
+              hidden_mult: 8
+              block_activation: ReLU
+              use_norm: true
+              skip_connection: true
+
+# 7
+- <<: *setting_0
+  model:
+    type: DRRGridRadianceField
+    param:
+      <<: *model_param_defaults
+      spatial_fdim: 16
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          if_refine: False
+          grid_type: DenseFeatGrid
+          grid_kwargs:
+            grid_shape: [128, 128, 128]
+            num_feat: 16

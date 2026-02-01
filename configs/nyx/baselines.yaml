@@ -1,0 +1,130 @@
+- optim: &optim_defaults
+    type: 'Adam'
+    param:
+      lr: 1.e-4
+      eps: 1.e-15
+      betas: [0.9, 0.999]
+
+  scheduler: &scheduler_defaults
+    type: 'cos'
+    param:
+      eta_min: 1.e-6
+
+  model:
+    type: 'KPlaneField'
+    param:
+      aabb: [0, 255]
+      grid_config:
+        grid_dimensions: 2
+        input_coordinate_dim: 6
+        output_coordinate_dim: 32
+        resolution: [32, 32, 32, 25, 25, 25]
+      concat_features_across_scales: True
+      multiscale_res: [1, 2, 4, 8]
+
+  dataset: &dataset_hdfield_defaults
+    type: HDFieldDataset
+    param: &dataset_param_defaults
+      # data_dir:
+      # cond_path:
+      # cond_split_path:
+      # impsmp_coord_path:
+      # impsmp_cond_path:
+      cond_batch: 16
+      spatial_log2batch: 16
+      dims: [256, 256, 256]
+      use_logdata: True
+      data_min: 19.85736566411684
+      data_max: 31.0656986604071
+      x_noise_std: 0.002352941176470588
+      x_noise_threshold: 0.00392156862745098
+      cond_noise_std: 0.000089999
+      cond_noise_threshold: 0.00015
+      noise_interp_value: True
+
+  train: &train_defaults
+    reportsteps: 10
+    teststeps: 10
+    testname: nyx/kplane
+    maxsteps: 50
+    disable_scheduler: False
+    train_scheme: hdinr_ddp
+    grad_scalar: True
+    num_workers: 8
+
+  test: &test_defaults
+    test_ckpt_indices: [-1]
+    test_output_dir: eval
+
+- optim:
+    <<: *optim_defaults
+
+  scheduler:
+    <<: *scheduler_defaults
+
+  model:
+    type: 'INR_FG'
+    param:
+      grid_shape: [64, 64, 64, 256, 256, 256, 16, 16, 16]
+      num_feat_3d: 32
+      num_feat_2d: 32
+      num_feat_1d: 16
+      out_features: 1
+
+  dataset:
+    <<: *dataset_hdfield_defaults
+    param:
+      <<: *dataset_param_defaults
+
+  train:
+    <<: *train_defaults
+    testname: nyx/explorableINR
+
+  test:
+    <<: *test_defaults
+
+- optim:
+    <<: *optim_defaults
+    type: 'Adam'
+    param:
+        lr: 1.e-4
+        eps: 1.e-15
+        betas: [0.9, 0.999]
+    groups:
+      - params: encoder_mlp_list
+        lr: 1.e-5
+
+  scheduler:
+    <<: *scheduler_defaults
+
+  model:
+    type: 'KVMemoryModel'
+    param:
+      cond_dims: 3
+      cond_hidden_dims: 16
+      num_entries: 1024
+      key_dim: 32
+      feature_dim_3d: 32
+      feature_dim_1d: 64
+      top_K: 16
+      chunk_size: 1024
+      num_hidden_layers: 4
+      mlp_encoder_dim: 512
+      mlp_hidden_dim: 128
+      out_features: 1
+      n_experts: 8
+      manager_res: 16
+      manager_hidden_dim: 64
+
+  dataset:
+    <<: *dataset_hdfield_defaults
+    param:
+      <<: *dataset_param_defaults
+      spatial_log2batch: 15
+
+  train:
+    <<: *train_defaults
+    testname: nyx/fainr
+
+  test:
+    <<: *test_defaults

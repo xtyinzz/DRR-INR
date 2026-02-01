@@ -1,0 +1,119 @@
+- &setting_0
+  optim: &optim_defaults
+    type: 'Adam'
+    param:
+      lr: 1.e-4
+      eps: 1.e-15
+      betas: [0.9, 0.999]
+
+  scheduler: &scheduler_defaults
+    type: 'cos'
+    param:
+      eta_min: 1.e-6
+
+  model: &model_defaults
+    type: 'HDINRBase'
+    param: &model_param_defaults
+      out_dim: 1
+      default_act: 'ReLU'
+      out_act: Sigmoid
+      decoder_kwargs:
+        type: 'FeatMLP'
+        param:
+          feat_dim: 128
+          num_layers: 3
+          out_dim: 1
+          activation: 'ReLU'
+
+      hidden_dim: 128
+      # spatial enc
+      encoder_kwargs:
+        type: 'MultiDenseFeatGrid'
+        param:
+          grid_shapes:
+            - [32, 32, 32]
+            - [80, 80, 80]
+            - [112, 112, 112]
+            - [128, 128, 128]
+          num_feat: 2
+          prerefine_feat_up_kwargs:
+            g: 8
+
+      if_refine: True
+
+      spatial_fdim: 128
+
+      # spatial refiner
+      spatial_trans_kwargs:
+        type: GLUFeatMLP
+        param:
+          feat_dim: 128
+          out_dim: 128
+          num_layers: 3
+          hidden_mult: 4
+          block_activation: ReLU
+          use_norm: true
+          skip_connection: true
+
+      # condition refiner
+      cond_trans_kwargs:
+        type: 'GLUFeatMLP'
+        param:
+          feat_dim: 48
+          out_dim: 48
+          num_layers: 4
+          hidden_mult: 5.34
+          block_activation: ReLU
+          use_norm: true
+          skip_connection: true
+
+      # condition enc
+      latent_kwargs:
+        type: 'MultiCondLatentLines'
+        param:
+          cond_dim: 3
+          line_dims_list:
+            - [2, 2, 2]
+            - [4, 4, 4]
+            - [8, 8, 8]
+            - [16, 16, 16]
+          latent_shape: [4]
+          latent_init_kwargs:
+            a: -0.001
+            b: 0.001
+
+      verbose: False
+
+  dataset: &dataset_hdfield_defaults
+    type: HDFieldDataset
+    param: &dataset_param_defaults
+      # data_dir:
+      # cond_path:
+      # cond_split_path:
+      # impsmp_coord_path:
+      # impsmp_cond_path:
+      cond_batch: 16
+      spatial_log2batch: 16
+      dims: [256, 256, 256]
+      use_logdata: True
+      data_min: 19.85736566411684
+      data_max: 31.0656986604071
+      x_noise_std: 0.002352941176470588
+      x_noise_threshold: 0.00392156862745098
+      cond_noise_std: 0.000089999
+      cond_noise_threshold: 0.00015
+      noise_interp_value: True
+
+  train: &train_defaults
+    reportsteps: 10
+    teststeps: 10
+    testname: nyx/drrNet
+    maxsteps: 50
+    disable_scheduler: False
+    train_scheme: hdinr_ddp
+    grad_scalar: True
+    num_workers: 4
+
+  test: &test_defaults
+    test_ckpt_indices: [-1]
+    test_output_dir: eval

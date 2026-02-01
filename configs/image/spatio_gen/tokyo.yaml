@@ -1,0 +1,206 @@
+- &setting_0
+  optim: &optim_defaults
+    type: 'Adam'
+    param:
+      lr: 5.e-3
+      eps: 1.e-15
+      betas: [0.9, 0.999]
+
+  scheduler: &scheduler_defaults
+    type: 'cos'
+    param:
+      eta_min: 5.e-5
+
+  model: &model_defaults
+    type: DRRINR
+    param: &model_param_defaults
+      out_dim: 3
+      decoder_hidden_dim: 128
+      spatial_fdim: 84
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          if_refine: True
+          grid_type: MultiDenseFeatGrid
+          grid_kwargs:
+            grid_shapes:
+              - [16, 16]
+              - [32, 32]
+              - [64, 64]
+              - [128, 128]
+              - [256, 256]
+              - [512, 512]
+              - [1024, 1024]
+            num_feat: 3
+            refine_highest_res: [1536, 1536]
+            prerefine_feat_up_kwargs:
+              g: 2
+
+          refiner_kwargs:
+            type: GLUFeatMLP
+            param:
+              feat_dim: 84
+              out_dim: 84
+              num_layers: 3
+              hidden_mult: 2
+              block_activation: ReLU
+              use_norm: true
+              skip_connection: true
+
+  dataset: &dataset_hdfield_defaults
+    type: FieldDataset
+    param: &dataset_param_defaults
+      # data_path:
+      log2batch: 18
+      dims: [21450, 56718]
+      use_logdata: False
+      dims_scale_factor: 0.5
+      x_noise_std: 5.594927265945543e-05
+      x_noise_threshold: 9.324878776575905e-05
+      noise_interp_value: True
+
+  train: &train_defaults
+    reportsteps: 100
+    teststeps: 50
+    testname: image_spatio_gen/tokyo/multiDense_DRR
+    maxsteps: 30
+    disable_scheduler: False
+    train_scheme: inr_ddp
+    num_workers: 4
+    eval_batch_size: 2097152
+
+  test: &test_defaults
+    test_ckpt_indices: [-1]
+    test_output_dir: eval
+
+# 1
+- <<: *setting_0
+  model:
+    <<: *model_defaults
+    param:
+      <<: *model_param_defaults
+      spatial_fdim: 21
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          if_refine: False
+          grid_type: MultiDenseFeatGrid
+          grid_kwargs:
+            grid_shapes:
+              - [16, 16]
+              - [32, 32]
+              - [64, 64]
+              - [128, 128]
+              - [256, 256]
+              - [512, 512]
+              - [1024, 1024]
+            num_feat: 3
+            fuse: concat
+
+  train:
+    <<: *train_defaults
+    testname: image_spatio_gen/tokyo/multiDense
+
+# 2
+- <<: *setting_0
+  model:
+    <<: *model_defaults
+    param:
+      <<: *model_param_defaults
+
+      spatial_fdim: 32
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          if_refine: True
+          grid_type: DenseFeatGrid
+          grid_kwargs:
+            grid_shape: [1024, 1024]
+            num_feat: 4
+            refine_highest_res: [2048, 2048]
+            prerefine_feat_up_kwargs:
+              g: 4
+
+          refiner_kwargs:
+            type: GLUFeatMLP
+            param:
+              feat_dim: 32
+              out_dim: 32
+              num_layers: 2
+              hidden_mult: 8
+              block_activation: ReLU
+              use_norm: true
+              skip_connection: true
+
+  train:
+    <<: *train_defaults
+    testname: image_spatio_gen/tokyo/dense_DRR
+
+# 3
+- <<: *setting_0
+  model:
+    <<: *model_defaults
+    param:
+      <<: *model_param_defaults
+
+      spatial_fdim: 4
+      encoder_kwargs:
+        type: DRRGrid
+        param:
+          if_refine: False
+          grid_type: DenseFeatGrid
+          grid_kwargs:
+            grid_shape: [1024, 1024]
+            num_feat: 4
+
+  train:
+    <<: *train_defaults
+    testname: image_spatio_gen/tokyo/dense
+
+# 4
+- <<: *setting_0
+  model:
+    <<: *model_defaults
+    param:
+      <<: *model_param_defaults
+      spatial_fdim: 14
+      encoder_kwargs:
+        type: HashGrid
+        param:
+          n_input_dims: 2
+          n_levels: 7
+          n_features_per_level: 2
+          log2_hashmap_size: 20
+          base_resolution: 16
+          max_resolution: 4096
+
+  train:
+    <<: *train_defaults
+    testname: image_spatio_gen/tokyo/ngp
+
+
+# 5
+- <<: *setting_0
+  optim:
+    type: 'Adam'
+    param:
+      lr: 1.e-4
+      eps: 1.e-15
+      betas: [0.9, 0.999]
+
+  scheduler:
+    type: 'cos'
+    param:
+      eta_min: 1.e-6
+
+  model:
+    type: Siren
+    param:
+      in_dim: 2
+      feat_dim: 512
+      num_layers: 8
+      out_dim: 3
+
+  train:
+    <<: *train_defaults
+    testname: image_spatio_gen/tokyo/siren

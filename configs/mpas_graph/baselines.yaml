@@ -1,0 +1,114 @@
+- optim: &optim_defaults
+    type: 'Adam'
+    param:
+      lr: 1.e-4
+      eps: 1.e-15
+      betas: [0.9, 0.999]
+
+  scheduler: &scheduler_defaults
+    type: 'cos'
+    param:
+      eta_min: 1.e-6
+
+  model:
+    type: 'KPlaneField'
+    param:
+      aabb: [0, 255]
+      grid_config:
+        grid_dimensions: 2
+        input_coordinate_dim: 7
+        output_coordinate_dim: 32
+        resolution: [32, 32, 32, 25, 25, 25, 25]
+      concat_features_across_scales: True
+      multiscale_res: [1, 2, 4, 8]
+
+  dataset: &dataset_hdfield_defaults
+    type: HDCurviFieldDataset
+    param: &dataset_param_defaults
+      # data_dir:
+      # cond_path:
+      # cond_split_path:
+      # coord_path:
+      # impsmp_coord_path:
+      cond_batch: 16
+      spatial_log2batch: 16
+      data_min: -1.9253274202346802
+      data_max: 30.346237182617188
+      dims: [11845146]
+      use_logdata: False
+
+  train: &train_defaults
+    reportsteps: 10
+    teststeps: 10
+    testname: mpas_graph/kplane
+    maxsteps: 50
+    disable_scheduler: False
+    train_scheme: hdinr_ddp
+    grad_scalar: True
+    num_workers: 8
+
+  test: &test_defaults
+    test_ckpt_indices: [-1]
+    test_output_dir: eval
+
+- optim:
+    <<: *optim_defaults
+
+  scheduler:
+    <<: *scheduler_defaults
+
+  model:
+    type: 'INR_FG'
+    param:
+      grid_shape: [64, 64, 64, 256, 256, 256, 16, 16, 16, 16]
+      num_feat_3d: 32
+      num_feat_2d: 32
+      num_feat_1d: 16
+      out_features: 1
+
+  dataset:
+    <<: *dataset_hdfield_defaults
+    param:
+      <<: *dataset_param_defaults
+
+  train:
+    <<: *train_defaults
+    testname: mpas_graph/explorableINR
+
+  test:
+    <<: *test_defaults
+
+- optim:
+    <<: *optim_defaults
+
+  scheduler:
+    <<: *scheduler_defaults
+
+  model:
+    type: 'KVMemoryModel'
+    param:
+      cond_dims: 4
+      cond_hidden_dims: 10
+      num_entries: 512
+      key_dim: 16
+      feature_dim_3d: 16
+      feature_dim_1d: 32
+      top_K: 8
+      chunk_size: 512
+      num_hidden_layers: 2
+      mlp_encoder_dim: 256
+      out_features: 1
+      n_experts: 5
+      manager_res: 16
+
+  dataset:
+    <<: *dataset_hdfield_defaults
+    param:
+      <<: *dataset_param_defaults
+
+  train:
+    <<: *train_defaults
+    testname: mpas_graph/fainr
+
+  test:
+    <<: *test_defaults
