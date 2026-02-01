@@ -1,8 +1,19 @@
-# Official Code for *Refine Now, Query Fast: A Decoupled Refinement Paradigm for Implicit Neural Fields*
+# Refine Now, Query Fast: A Decoupled Refinement Paradigm for Implicit Neural Fields
 
-This repository contains the official implementation for the paper **"Refine Now, Query Fast: A Decoupled Refinement Paradigm for Implicit Neural Fields"** (Submission ID: **8494**).
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Conference](https://img.shields.io/badge/Conference-ICLR_2026-blue)](https://iclr.cc/)
 
-This document provides instructions on how to set up the environment and execute the experiments required to reproduce the main results reported in our paper.
+> **🚀 Resolving the Fidelity-Speed Dilemma in Implicit Neural Representations (INRs)**
+
+This repository contains the official implementation for the paper **"Refine Now, Query Fast: A Decoupled Refinement Paradigm for Implicit Neural Fields"**, accepted to **ICLR 2026**.
+
+### 📄 Abstract
+Implicit Neural Representations (INRs) often force a compromise: high-fidelity MLP models are slow to query, while fast embedding-based models struggle with expressivity. We propose Decoupled Representation Refinement (DRR), an architectural paradigm that resolves this by learning deep, expressive feature transformations directly on the embedding structure. By utilizing a one-time, offline process to encode rich, non-linear representations into the embeddings, we effectively decouple the heavy network from the inference path. This enables the fast embedding query to deliver highly expressive features, achieving high representational capacity with minimal inference latency.
+
+### ✨ Key Features
+* **⚡ State-of-the-Art Accuracy & Efficiency** Achieves state-of-the-art generalization for unseen input conditions and coordinates for large-scale 3D volumetric simulations. It delivers high-fidelity reconstructions while being being **27$\times$ faster** with **45$\times$ reduction** in computation (TFLOPs per billion queries) compared to high-fidelity baselines.
+* **🧠 Decoupled Representation Refinement (DRR):** Separates the expensive learning phase from the fast query phase, matching the speed of pure embedding-based methods.
+* **📈 Variational Pairs (VP):** A novel data augmentation strategy designed for INR tasks, demonstrated improvement on generalization for high-dimensional surrogate modeling and sparse ensemble data.
 
 ---
 
@@ -45,7 +56,7 @@ pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/to
 ---
 ## 3. Running Experiments
 
-This project uses [Hugging Face Accelerate](https://huggingface.co/docs/accelerate) for training and evaluation. While `accelerate` simplifies scaling to multi-GPU setups, all experiments in the paper were conducted on a single GPU using the provided configuration file at `configs/accl/one.yaml`.
+This project uses [Hugging Face Accelerate](https://huggingface.co/docs/accelerate) for training and evaluation. While current setup works for distributed training, all experiments in the paper were conducted on a single GPU using the provided configuration file at `configs/accl/one.yaml`.
 
 ### 3.1. General Execution Commands
 
