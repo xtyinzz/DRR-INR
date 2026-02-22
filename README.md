@@ -11,9 +11,9 @@ This repository contains the official implementation for the paper **"Refine Now
 Implicit Neural Representations (INRs) often force a compromise: high-fidelity MLP models are slow to query, while fast embedding-based models struggle with expressivity. We propose Decoupled Representation Refinement (DRR), an architectural paradigm that resolves this by learning deep, expressive feature transformations directly on the embedding structure. By utilizing a one-time, offline process to encode rich, non-linear representations into the embeddings, we effectively decouple the heavy network from the inference path. This enables the fast embedding query to deliver highly expressive features, achieving high representational capacity with minimal inference latency.
 
 ### ✨ Key Features
-* **⚡ State-of-the-Art Accuracy & Efficiency** Achieves state-of-the-art generalization for unseen input conditions and coordinates for large-scale 3D volumetric simulations. It delivers high-fidelity reconstructions while being being **27$\times$ faster** with **45$\times$ reduction** in computation (TFLOPs per billion queries) compared to high-fidelity baselines.
+* **⚡ State-of-the-Art Accuracy & Efficiency:** Achieves state-of-the-art generalization for unseen input conditions and coordinates for large-scale 3D volumetric simulations. It delivers high-fidelity reconstructions while being **27x faster** with a **45x reduction** in computation (TFLOPs per billion queries) compared to high-fidelity baselines.
 * **🧠 Decoupled Representation Refinement (DRR):** Separates the expensive learning phase from the fast query phase, matching the speed of pure embedding-based methods.
-* **📈 Variational Pairs (VP):** A novel data augmentation strategy designed for INR tasks, demonstrated improvement on generalization for high-dimensional surrogate modeling and sparse ensemble data.
+* **📈 Variational Pairs (VP):** A novel data augmentation strategy designed for INR tasks, demonstrating significant improvement on generalization for high-dimensional surrogate modeling and sparse ensemble data.
 
 ---
 
@@ -119,3 +119,18 @@ The NeRF experiments use dedicated training scripts.
 ## 4. Dataset Preparation (`HDFieldDataset`)
 
 See the dataset preparation instructions in [datasets/README.md](datasets/README.md).
+
+
+## 5. Citation
+
+If you find our work useful in your research, please consider citing:
+
+```bibtex
+@article{xiong2026refine,
+  title={Refine Now, Query Fast: A Decoupled Refinement Paradigm for Implicit Neural Fields},
+  author={Xiong, Tianyu and Wurster, Skylar and Shen, Han-Wei},
+  journal={arXiv preprint arXiv:2602.15155},
+  year={2026},
+  note={Accepted to ICLR 2026}
+}
+```
