@@ -1,9 +1,29 @@
 # Refine Now, Query Fast: A Decoupled Refinement Paradigm for Implicit Neural Fields
 
+<div align="center">
+    <p>
+        <a href="https://xtyinzz.github.io/">Tianyu Xiong</a><sup>1</sup>&nbsp;&nbsp;
+        <a href="https://skywolf829.github.io/#about">Skylar Wurster</a><sup>2</sup>&nbsp;&nbsp;
+        <a href="https://han-wei-shen.github.io/">Han-Wei Shen</a><sup>1</sup>&nbsp;&nbsp;
+    </p>
+    <p>
+        <sup>1</sup>The Ohio State University &nbsp;&nbsp;&nbsp;
+        <sup>2</sup>Adobe &nbsp;&nbsp;&nbsp;
+    </p>
+</div>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Conference](https://img.shields.io/badge/Conference-ICLR_2026-blue)](https://iclr.cc/)
+[![Paper](https://img.shields.io/badge/Paper-arXiv-B31B1B)](https://arxiv.org/abs/2602.15155)
+
 
 > **🚀 Resolving the Fidelity-Speed Dilemma in Implicit Neural Representations (INRs)**
+
+<div align="center">
+    <img src="DRR_teaser.png" alt="DRR Teaser" style="width: 60%; height: auto;" />
+</div>
+
+
 
 This repository contains the official implementation for the paper **"Refine Now, Query Fast: A Decoupled Refinement Paradigm for Implicit Neural Fields"**, accepted to **ICLR 2026**.
 
